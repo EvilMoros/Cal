@@ -1,0 +1,120 @@
+html_content = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sales Income Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #f4f4f4;
+      max-width: 600px;
+      margin: auto;
+    }
+    h2 { color: #333; }
+    label, select, input {
+      display: block;
+      margin: 10px 0;
+      width: 100%;
+      padding: 8px;
+    }
+    .output {
+      background: #fff;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h2>Sales Income Calculator</h2>
+
+  <label>Ticket Cost ($)
+    <input type="number" id="ticketCost" step="0.01" />
+  </label>
+
+  <label>Time Period
+    <select id="periodType">
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+  </label>
+
+  <label>Total Tickets Sold
+    <input type="number" id="totalSold" />
+  </label>
+
+  <label>Prize Amount ($)
+    <input type="number" id="prizeAmount" step="0.01" />
+  </label>
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div class="output" id="results"></div>
+
+  <script>
+    function calculate() {
+      const ticketCost = parseFloat(document.getElementById('ticketCost').value);
+      const periodType = document.getElementById('periodType').value;
+      const totalSold = parseInt(document.getElementById('totalSold').value);
+      const prize = parseFloat(document.getElementById('prizeAmount').value);
+
+      if (isNaN(ticketCost) || isNaN(totalSold) || isNaN(prize)) {
+        alert("Please enter valid numbers in all fields.");
+        return;
+      }
+
+      const revenue = ticketCost * totalSold;
+
+      // Processing Costs
+      const processingCost = (totalSold * 0.7 * ticketCost * 0.05) + (totalSold * 0.3 * ticketCost * 0.02);
+
+      // MAGLA Tax = 12.5% of (revenue - prize)
+      const maglaTax = 0.125 * (revenue - prize);
+
+      // Tech Cost = 15% of (revenue - prize - magla)
+      const techCost = 0.15 * (revenue - prize - maglaTax);
+
+      // Affiliate = 5% of revenue
+      const affiliate = 0.05 * revenue;
+
+      // Discount = 5% of revenue
+      const discount = 0.05 * revenue;
+
+      const totalDeductions = processingCost + prize + maglaTax + techCost + affiliate + discount;
+      const netIncome = revenue - totalDeductions;
+
+      // Daily, Weekly, Monthly equivalents
+      const factor = {
+        daily: [1, 7, 30],
+        weekly: [1 / 7, 1, 4],
+        monthly: [1 / 30, 1 / 4, 1]
+      }[periodType];
+
+      const daily = netIncome * factor[0];
+      const weekly = netIncome * factor[1];
+      const monthly = netIncome * factor[2];
+
+      document.getElementById('results').innerHTML = `
+        <h3>Results</h3>
+        <p><strong>Total Revenue:</strong> $${revenue.toFixed(2)}</p>
+        <p><strong>Processing Cost:</strong> $${processingCost.toFixed(2)}</p>
+        <p><strong>Prize (Fixed):</strong> $${prize.toFixed(2)}</p>
+        <p><strong>MAGLA Tax:</strong> $${maglaTax.toFixed(2)}</p>
+        <p><strong>Tech Cost:</strong> $${techCost.toFixed(2)}</p>
+        <p><strong>Affiliate:</strong> $${affiliate.toFixed(2)}</p>
+        <p><strong>Discount:</strong> $${discount.toFixed(2)}</p>
+        <p><strong>Net Income:</strong> $${netIncome.toFixed(2)}</p>
+        <hr>
+        <p><strong>Daily Net:</strong> $${daily.toFixed(2)}</p>
+        <p><strong>Weekly Net:</strong> $${weekly.toFixed(2)}</p>
+        <p><strong>Monthly Net:</strong> $${monthly.toFixed(2)}</p>
+      `;
+    }
+  </script>
+</body>
+</html>
+"""
